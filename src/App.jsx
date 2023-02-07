@@ -1,9 +1,9 @@
 import { ChevronRightIcon } from "@chakra-ui/icons"
 import { Button, Heading, Input, InputGroup, InputRightElement, Stack, StackDivider, Text } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { getInfo } from "./API/getInfo"
 import { Card } from "./Card"
-
+import { Mapa } from "./Mapa"
 
 export const App = () => {
   const [ipInput, setIpInput] = useState('')
@@ -13,17 +13,17 @@ export const App = () => {
     e.preventDefault()
     if (ipInput === '') return
     const fetchData = await getInfo(ipInput)
-    setData(fetchData)
-    const location = await getLocation()
-    console.log({data, location});
+    const ubication = await getLocation(fetchData)
+    setData({...fetchData, ubication})
+    setIpInput('')
   }
 
-  const getLocation = async () => {
-    if (data.location === undefined) return
-    const location = `${data.location.region}, ${data.location.country}`
-    return location
+  const getLocation = async (fetchData) => {
+    if (fetchData.location === undefined) return
+    const ubication = `${fetchData.location.region}, ${fetchData.location.country}`
+    return ubication
   }
-  
+
   return (
     <Stack
       h="100vh"
@@ -58,7 +58,7 @@ export const App = () => {
               bg='whiteAlpha'
               borderRadius='lg'
               value={ipInput}
-              onChange={(e) => setIpInput(e.target.value)}
+              onChange={(e) => setIpInput(e.target.value.trim())}
             />
             <InputRightElement
               children={
@@ -93,20 +93,21 @@ export const App = () => {
           h={32}
           top='33%'
           p={5}
+          zIndex={'2'}
           divider={<StackDivider borderColor='gray.300' />}
         >
           <Card title='IP address' info={data.ip}/>
-          <Card title='Location' info={location !== undefined ? '' : location}/>
-          <Card title='Timezone' info={'algo'}/>
+          <Card title='Location' info={data.ubication}/>
+          <Card title='Timezone' info={data.location === undefined ? '' : `UTC ${data.location?.timezone}`}/>
           <Card title='ISP' info={data.isp}/>
         </Stack>
       </Stack>
       <Stack
-        bg='cyan.100'
-        h='60%'
+        w='100%'
+        zIndex={'1'}
         mt='0px !important'
       >
-        {/* map */}
+        <Mapa location={data.location}/>
       </Stack>
     </Stack>
   )
